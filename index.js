@@ -20,7 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 
-
 //register new user
 app.post('/register', async (req, res) => {
   const body = _.pick(req.body, ['email', 'password', 'first_name', 'last_name']);
@@ -57,9 +56,6 @@ app.delete('/logout', authenticate, async (req, res) => {
     res.status(400).send();
   }
 });
-
-
-
 // Gets called because of `asyncErrorHandler()` middleware
 app.use(function (error, req, res, next) {
   res.json({ message: error.message });
