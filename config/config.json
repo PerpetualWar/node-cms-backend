@@ -1,0 +1,12 @@
+{
+  "development": {
+    "PORT": 8080,
+    "MONGODB_URI": "mongodb://localhost:27017/backend-api",
+    "JWT_SECRET": "shkdhfjhskhi438y897isosdhf789d"
+  },
+  "test": {
+    "PORT": 8080,
+    "MONGODB_URI": "mongodb://localhost:27017/backend-api",
+    "JWT_SECRET": "sd768sdgikhgsuid9asjda9sd9a990a"
+  }
+}
