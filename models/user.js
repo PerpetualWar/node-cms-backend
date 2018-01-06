@@ -50,11 +50,15 @@ UserSchema.methods.toJSON = function () {
 
 UserSchema.methods.generateAuthToken = async function () { //adding custom method to instances of models
   const access = 'auth';
-  const token = jwt.sign({ _id: this._id.toHexString(), access }, process.env.JWT_SECRET).toString();
+  const token = jwt.sign(
+    { _id: this._id.toHexString(), access },
+    process.env.JWT_SECRET,
+    { expiresIn: '2h' }
+  ).toString();
 
   this.tokens.push({ access, token });
 
-  await this.save();
+  await this.save(err => console.log(err));
   return token;
 };
 
@@ -89,6 +93,7 @@ UserSchema.statics.findByToken = async function (token) { // adding custom model
     return Promise.reject();
   }
 };
+
 UserSchema.statics.findByCredentials = async function (email, password) {
   try {
     const user = await this.findOne({ email });
