@@ -5,8 +5,9 @@ const fs = require('fs');
 const cors = require('cors');
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
+const path = require('path');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+const jwt = require('jsonwebtoken');
 
 const { mongoose } = require('./db/mongoose');
 const { User } = require('./models/user');
@@ -14,6 +15,17 @@ const { Post } = require('./models/post');
 const { Gallery } = require('./models/gallery');
 const { authenticate } = require('./middleware/authenticate');
 const { asyncErrorHandler } = require('./middleware/errorHandler');
+// const { upload } = require('./middleware/upload')
+
+const upload = multer({
+  dest: 'uploads/',
+  fileFilter: (req, file, callback) => {
+    var ext = path.extname(file.originalname);
+    if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg')
+      return callback(new Error('Only images allowed!'))
+    callback(null, true)
+  }
+}).array('photos', 12);
 
 const app = express();
 const port = process.env.PORT;
@@ -23,6 +35,7 @@ app.disable('x-powered-by');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
+
 
 //register new user
 app.post('/register', async (req, res) => {
@@ -64,6 +77,15 @@ app.delete('/logout', authenticate, async (req, res) => {
   }
 });
 
+//admin
+app.get('/admin', authenticate, async (req, res) => {
+  const token = jwt.decode(req.token);
+  if (token.role !== 'admin')
+    return res.send({ message: 'Only admins allowed!' });
+  res.send({ message: 'You are allowed as admin' });
+  // console.log(token);
+});
+
 //posts
 app.post('/post', authenticate, async (req, res) => {
   // const body = _.pick(req.body, [])
@@ -82,7 +104,7 @@ app.post('/post', authenticate, async (req, res) => {
 });
 
 //save pics
-app.post('/photos/upload', authenticate, upload.array('photos', 12), async (req, res, next) => {
+app.post('/photos/upload', authenticate, upload, async (req, res, next) => {
   // req.files is array of `photos` files
   // req.body will contain the text fields, if there were any
   const galleryArr = req.files.map(pic => ({
