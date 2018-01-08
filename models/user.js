@@ -30,6 +30,12 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  role : {
+    type: String, 
+    required: true, 
+    default: 'user',
+    enum: ['user', 'mod', 'admin']
+  },
   tokens: [{
     access: {
       type: String,
@@ -48,10 +54,12 @@ UserSchema.methods.toJSON = function () {
   return _.pick(userObject, ['id', 'email']);
 };
 
-UserSchema.methods.generateAuthToken = async function () { //adding custom method to instances of models
+UserSchema.methods.generateAuthToken = async function (id) { //adding custom method to instances of models
   const access = 'auth';
+  const [userObj] = await User.find({ _id: id });
+  const { role } = userObj;
   const token = jwt.sign(
-    { _id: this._id.toHexString(), access },
+    { _id: this._id.toHexString(), access, role },
     process.env.JWT_SECRET,
     { expiresIn: '2h' }
   ).toString();
