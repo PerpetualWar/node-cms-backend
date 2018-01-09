@@ -5,8 +5,6 @@ const fs = require('fs');
 const cors = require('cors');
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
-const path = require('path');
-const multer = require('multer');
 const jwt = require('jsonwebtoken');
 
 const { mongoose } = require('./db/mongoose');
@@ -15,17 +13,7 @@ const { Post } = require('./models/post');
 const { Gallery } = require('./models/gallery');
 const { authenticate } = require('./middleware/authenticate');
 const { asyncErrorHandler } = require('./middleware/errorHandler');
-// const { upload } = require('./middleware/upload')
-
-const upload = multer({
-  dest: 'uploads/',
-  fileFilter: (req, file, callback) => {
-    var ext = path.extname(file.originalname);
-    if (ext !== '.png' && ext !== '.jpg' && ext !== '.gif' && ext !== '.jpeg')
-      return callback(new Error('Only images allowed!'))
-    callback(null, true)
-  }
-}).array('photos', 12);
+const { upload } = require('./middleware/upload')
 
 const app = express();
 const port = process.env.PORT;
@@ -104,7 +92,7 @@ app.post('/post', authenticate, async (req, res) => {
 });
 
 //save pics
-app.post('/photos/upload', authenticate, upload, async (req, res, next) => {
+app.post('/photos/upload', authenticate, upload.array('photos', 12), async (req, res, next) => {
   // req.files is array of `photos` files
   // req.body will contain the text fields, if there were any
   const galleryArr = req.files.map(pic => ({
@@ -128,18 +116,32 @@ app.post('/photos/upload', authenticate, upload, async (req, res, next) => {
 app.get('/photos/:gallery', authenticate, async (req, res) => {
   const galleryName = req.params.gallery;
   try {
-    const photos = await Gallery.find({ 'gallery.galleryName': galleryName });
+    // const photos2 = await Gallery.find({ 'gallery.galleryName': galleryName });
+    const photos = await Gallery.aggregate([
+      { $unwind: '$gallery' },
+      { $match: { 'gallery.galleryName': galleryName } },
+    ]);
     res.send(photos);
   } catch (e) {
     res.status(400).send(e);
   }
 });
 
-//get pics
-app.get('/photos/:id', authenticate, async (req, res) => {
+//get pic
+app.get('/photos/id/:id', authenticate, async (req, res) => {
   const id = req.params.id;
+  const objectId = mongoose.Types.ObjectId(id);
   try {
-    const photo = await Gallery.find({ '_id': id }) //ovo ne radi
+    const photo = await Gallery.aggregate([
+      { $unwind: '$gallery' },
+      { $match: { 'gallery._id': objectId } },
+    ]);
+    // const photo = await Gallery.find({
+    //   'gallery._id': id
+    // }, {
+    //     'gallery.$': 1
+    //     // 'gallery': { $elemMatch: { _id: id } }
+    //   });
     res.send(photo);
   } catch (e) {
     res.status(400).send(e);
