@@ -49,6 +49,7 @@ app.post('/api-token-auth', async (req, res) => {
   try {
     const user = await User.findByCredentials(body.email, body.password);
     const token = await user.generateAuthToken(user.id);
+    await User.removeExpiredTokens(user);
     res.header('Authorization', token).send({ user, token });
   } catch (e) {
     res.status(400).send(e);

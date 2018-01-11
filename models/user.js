@@ -30,9 +30,9 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
-  role : {
-    type: String, 
-    required: true, 
+  role: {
+    type: String,
+    required: true,
     default: 'user',
     enum: ['user', 'mod', 'admin']
   },
@@ -64,9 +64,9 @@ UserSchema.methods.generateAuthToken = async function (id) { //adding custom met
       process.env.JWT_SECRET,
       { expiresIn: '2h' }
     ).toString();
-  
+
     this.tokens.push({ access, token });
-  
+
     await this.save(err => console.log(err));
     return token;
   } catch (e) {
@@ -89,6 +89,22 @@ UserSchema.methods.removeToken = async function (token) {
   //     tokens: { token }
   //   }
   // })
+};
+
+UserSchema.statics.removeExpiredTokens = async function (userObj) {
+  const { tokens } = userObj;
+  try {
+    return tokens.map(async tokenObj => {
+      const { token } = tokenObj;
+      const decoded = jwt.decode(token);
+      const expTime = decoded.exp * 1000; // mulitply by 1000 to get epoch in ms
+      const currentTime = new Date().getTime(); // already in ms
+      if (currentTime > expTime)
+        return await userObj.removeToken(token);
+    });
+  } catch (e) {
+    return Promise.reject();
+  }
 };
 
 UserSchema.statics.findByToken = async function (token) { // adding custom model method by statics
