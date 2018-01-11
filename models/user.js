@@ -56,18 +56,22 @@ UserSchema.methods.toJSON = function () {
 
 UserSchema.methods.generateAuthToken = async function (id) { //adding custom method to instances of models
   const access = 'auth';
-  const [userObj] = await User.find({ _id: id });
-  const { role } = userObj;
-  const token = jwt.sign(
-    { _id: this._id.toHexString(), access, role },
-    process.env.JWT_SECRET,
-    { expiresIn: '2h' }
-  ).toString();
-
-  this.tokens.push({ access, token });
-
-  await this.save(err => console.log(err));
-  return token;
+  try {
+    const [userObj] = await User.find({ _id: id });
+    const { role } = userObj;
+    const token = jwt.sign(
+      { _id: this._id.toHexString(), access, role },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    ).toString();
+  
+    this.tokens.push({ access, token });
+  
+    await this.save(err => console.log(err));
+    return token;
+  } catch (e) {
+    return Promise.reject();
+  }
 };
 
 UserSchema.methods.removeToken = async function (token) {

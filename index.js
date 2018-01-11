@@ -71,7 +71,6 @@ app.get('/admin', authenticate, async (req, res) => {
   if (token.role !== 'admin')
     return res.send({ message: 'Only admins allowed!' });
   res.send({ message: 'You are allowed as admin' });
-  // console.log(token);
 });
 
 //posts
@@ -86,6 +85,15 @@ app.post('/post', authenticate, async (req, res) => {
   try {
     const savedPost = await post.save();
     res.send(savedPost);
+  } catch (e) {
+    res.status(400).send(e);
+  }
+});
+
+app.get('/post', authenticate, async (req, res) => {
+  try {
+    const posts = await Post.find({});
+    res.send(posts);
   } catch (e) {
     res.status(400).send(e);
   }
@@ -116,7 +124,6 @@ app.post('/photos/upload', authenticate, upload.array('photos', 12), async (req,
 app.get('/photos/:gallery', authenticate, async (req, res) => {
   const galleryName = req.params.gallery;
   try {
-    // const photos2 = await Gallery.find({ 'gallery.galleryName': galleryName });
     const photos = await Gallery.aggregate([
       { $unwind: '$gallery' },
       { $match: { 'gallery.galleryName': galleryName } },
@@ -147,7 +154,6 @@ app.get('/photos/id/:id', authenticate, async (req, res) => {
     res.status(400).send(e);
   }
 });
-
 
 // Gets called because of `asyncErrorHandler()` middleware
 app.use(function (error, req, res, next) {
