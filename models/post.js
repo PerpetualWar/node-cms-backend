@@ -10,7 +10,8 @@ const PostSchema = new mongoose.Schema({
     default: Date.now
   },
   author: {
-    type: mongoose.Schema.Types.ObjectId
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   },
   category: {
     type: String,

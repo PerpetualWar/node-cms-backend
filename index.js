@@ -70,7 +70,7 @@ app.delete('/logout', authenticate, async (req, res) => {
 app.get('/admin', authenticate, async (req, res) => {
   const token = jwt.decode(req.token);
   if (token.role !== 'admin')
-    return res.send({ message: 'Only admins allowed!' });
+    return res.status(400).send({ message: 'Only admins allowed!' });
   res.send({ message: 'You are allowed as admin' });
 });
 
@@ -91,6 +91,7 @@ app.post('/post', authenticate, async (req, res) => {
   }
 });
 
+// get all posts regardless of category
 app.get('/post', authenticate, async (req, res) => {
   try {
     const posts = await Post.find({});
@@ -138,6 +139,9 @@ app.get('/photos/:gallery', authenticate, async (req, res) => {
 //get pic
 app.get('/photos/id/:id', authenticate, async (req, res) => {
   const id = req.params.id;
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
   const objectId = mongoose.Types.ObjectId(id);
   try {
     const photo = await Gallery.aggregate([

@@ -91,9 +91,9 @@ UserSchema.methods.removeToken = async function (token) {
   // })
 };
 
-UserSchema.statics.removeExpiredTokens = async function (userObj) {
-  const { tokens } = userObj;
+UserSchema.statics.removeExpiredTokens = function (userObj) {
   try {
+    const { tokens } = userObj;
     return tokens.map(async tokenObj => {
       const { token } = tokenObj;
       const decoded = jwt.decode(token);
