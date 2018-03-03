@@ -4,3 +4,4 @@
 /tests
 /logger/combined.log
 /logger/error.log
+yarn-error.log

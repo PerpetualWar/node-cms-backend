@@ -6,8 +6,9 @@ const cors = require('cors');
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
 const jwt = require('jsonwebtoken');
-const logger = require('./logger');
+const morgan = require('morgan');
 
+const logger = require('./logger');
 const { mongoose } = require('./db/mongoose');
 const { User } = require('./models/user');
 const { Post } = require('./models/post');
@@ -24,7 +25,8 @@ app.disable('x-powered-by');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
-app.use(require("morgan")("combined", { stream: logger.stream }));
+//combine morgan and winston loggers
+app.use(morgan(("combined", { stream: logger.stream })));
 
 
 //register new user
@@ -168,7 +170,6 @@ app.use(function (error, req, res, next) {
 });
 
 app.listen(port, () => {
-  // console.log(`Server started at port ${port}`);
   logger.info(`Server started at port ${port}`);
 });
 

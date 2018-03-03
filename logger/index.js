@@ -15,14 +15,16 @@ const logger = winston.createLogger({
       handleExceptions: true,
       maxsize: 5242880, //5MB
       maxFiles: 5,
-      colorize: false
+      colorize: false,
+      timestamp: true
     }),
     new winston.transports.File({
       filename: './logger/combined.log',
       handleExceptions: true,
       maxsize: 5242880, //5MB
       maxFiles: 5,
-      colorize: false
+      colorize: false,
+      timestamp: true
     })
   ],
   exitOnError: false
@@ -37,7 +39,6 @@ if (process.env.NODE_ENV !== 'production') {
     format: winston.format.simple(),
     level: 'debug',
     handleExceptions: true,
-    // json: false,
     colorize: true
   }));
 }
