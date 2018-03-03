@@ -2,3 +2,5 @@
 /config/config.json
 /uploads
 /tests
+/logger/combined.log
+/logger/error.log
