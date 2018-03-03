@@ -1,4 +1,5 @@
 require('./config/config');
+require('./logger');
 
 const express = require('express');
 const fs = require('fs');
@@ -13,7 +14,7 @@ const { Post } = require('./models/post');
 const { Gallery } = require('./models/gallery');
 const { authenticate } = require('./middleware/authenticate');
 const { asyncErrorHandler } = require('./middleware/errorHandler');
-const { upload } = require('./middleware/upload')
+const { upload } = require('./middleware/upload');
 
 const app = express();
 const port = process.env.PORT;
